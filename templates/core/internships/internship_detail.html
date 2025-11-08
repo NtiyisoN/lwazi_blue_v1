@@ -1,0 +1,138 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ internship.title }} - Lwazi Blue{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 mb-4">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h2 class="card-title">{{ internship.title }}</h2>
+                <h4 class="text-muted">{{ internship.employer.company_name }}</h4>
+                
+                <div class="mb-3">
+                    <span class="badge bg-primary me-2">{{ internship.industry.name }}</span>
+                    <span class="badge bg-info text-dark me-2">{{ internship.duration_months }} months</span>
+                    {% if internship.stipend %}
+                    <span class="badge bg-success">R{{ internship.stipend|floatformat:0 }}/month</span>
+                    {% else %}
+                    <span class="badge bg-secondary">Unpaid</span>
+                    {% endif %}
+                </div>
+                
+                <hr>
+                
+                <h5><i class="bi bi-file-text"></i> Description</h5>
+                <p>{{ internship.description|linebreaks }}</p>
+                
+                <h5><i class="bi bi-list-check"></i> Requirements</h5>
+                <p>{{ internship.requirements|linebreaks }}</p>
+                
+                <h5><i class="bi bi-briefcase"></i> Responsibilities</h5>
+                <p>{{ internship.responsibilities|linebreaks }}</p>
+                
+                {% if internship.skills_required.exists %}
+                <h5><i class="bi bi-tools"></i> Skills Required</h5>
+                <div class="mb-3">
+                    {% for skill in internship.skills_required.all %}
+                    <span class="badge bg-secondary me-1">{{ skill.name }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card shadow-sm mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Internship Details</h5>
+                
+                <p class="mb-2">
+                    <i class="bi bi-geo-alt"></i> <strong>Location:</strong><br>
+                    {{ internship.location }}<br>
+                    {{ internship.municipality }}, {{ internship.province }}
+                </p>
+                
+                <p class="mb-2">
+                    <i class="bi bi-calendar-event"></i> <strong>Start Date:</strong><br>
+                    {{ internship.start_date|date:"F d, Y" }}
+                </p>
+                
+                <p class="mb-2">
+                    <i class="bi bi-clock"></i> <strong>Application Deadline:</strong><br>
+                    {{ internship.application_deadline|date:"F d, Y" }}
+                    <br><span class="text-danger small">{{ internship.days_until_deadline }} days left</span>
+                </p>
+                
+                <p class="mb-2">
+                    <i class="bi bi-hourglass"></i> <strong>Duration:</strong><br>
+                    {{ internship.duration_months }} months
+                </p>
+                
+                <p class="mb-2">
+                    <i class="bi bi-currency-dollar"></i> <strong>Stipend:</strong><br>
+                    {% if internship.stipend %}
+                        R{{ internship.stipend|floatformat:0 }}/month
+                    {% else %}
+                        Unpaid
+                    {% endif %}
+                </p>
+                
+                <hr>
+                
+                {% if user.is_authenticated and user.user_type == 'intern' %}
+                    {% if internship.is_accepting_applications %}
+                        {% if has_applied %}
+                            <a href="{% url 'applications:detail' has_applied.pk %}" class="btn btn-success w-100">
+                                <i class="bi bi-check-circle"></i> View Application
+                            </a>
+                            <p class="small text-muted mt-2">
+                                Status: <span class="badge {{ has_applied.status_badge_class }}">{{ has_applied.get_status_display }}</span>
+                            </p>
+                        {% else %}
+                            <a href="{% url 'applications:create' internship.pk %}" class="btn btn-primary w-100">
+                                <i class="bi bi-file-earmark-text"></i> Apply Now
+                            </a>
+                        {% endif %}
+                    {% else %}
+                        <button class="btn btn-secondary w-100" disabled>
+                            Applications Closed
+                        </button>
+                    {% endif %}
+                {% elif user.is_authenticated and user.user_type == 'employer' %}
+                    <div class="alert alert-info small">
+                        <i class="bi bi-info-circle"></i>
+                        Employers cannot apply to internships
+                    </div>
+                {% else %}
+                    <a href="{% url 'accounts:login' %}" class="btn btn-primary w-100">
+                        <i class="bi bi-box-arrow-in-right"></i> Login to Apply
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">About {{ internship.employer.company_name }}</h5>
+                <p class="small">{{ internship.employer.company_description|truncatewords:50 }}</p>
+                {% if internship.employer.company_website %}
+                <a href="{{ internship.employer.company_website }}" target="_blank" class="btn btn-outline-primary btn-sm w-100">
+                    <i class="bi bi-globe"></i> Visit Website
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-3">
+    <div class="col-12">
+        <a href="{% url 'core:internship_list' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Back to Listings
+        </a>
+    </div>
+</div>
+{% endblock %}
+

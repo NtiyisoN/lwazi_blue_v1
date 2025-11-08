@@ -1,0 +1,159 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Conversation - Lwazi Blue{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-10 offset-lg-1">
+        <!-- Conversation Header -->
+        <div class="card shadow-sm mb-3">
+            <div class="card-header bg-primary text-white">
+                <div class="d-flex align-items-center">
+                    {% if is_employer %}
+                        <!-- Employer sees intern -->
+                        {% if conversation.intern.profile_photo %}
+                            <img src="{{ conversation.intern.profile_photo.url }}" alt="Photo" 
+                                 style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;" class="me-3">
+                        {% else %}
+                            <div class="bg-white text-primary me-3" 
+                                 style="width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                <i class="bi bi-person"></i>
+                            </div>
+                        {% endif %}
+                        <div class="flex-grow-1">
+                            <h6 class="mb-0">{{ conversation.intern.full_name|default:conversation.intern.user.username }}</h6>
+                            <small>@{{ conversation.intern.user.username }}</small>
+                        </div>
+                        <a href="{% url 'core:intern_profile_public' conversation.intern.user.username %}" 
+                           class="btn btn-light btn-sm">
+                            <i class="bi bi-eye"></i> View Profile
+                        </a>
+                    {% else %}
+                        <!-- Intern sees employer -->
+                        {% if conversation.employer.company_logo %}
+                            <img src="{{ conversation.employer.company_logo.url }}" alt="Logo" 
+                                 style="width: 40px; height: 40px; object-fit: contain;" class="me-3">
+                        {% else %}
+                            <div class="bg-white text-primary me-3" 
+                                 style="width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                                <i class="bi bi-building"></i>
+                            </div>
+                        {% endif %}
+                        <div>
+                            <h6 class="mb-0">{{ conversation.employer.company_name }}</h6>
+                            <small>{{ conversation.employer.contact_person }}</small>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Messages -->
+        <div class="card shadow-sm mb-3">
+            <div class="card-body p-4" style="height: 500px; overflow-y: auto;" id="messagesContainer">
+                {% if chat_messages %}
+                    {% for msg in chat_messages %}
+                    <div class="mb-3 {% if msg.sender_user == user %}text-end{% endif %}">
+                        <div class="d-inline-block message-bubble {% if msg.sender_user == user %}message-sent{% else %}message-received{% endif %}">
+                            <div class="message-text">{{ msg.message|linebreaks }}</div>
+                            <div class="message-time small text-muted mt-1">
+                                {{ msg.sent_at|date:"M d, g:i A" }}
+                                {% if msg.sender_user == user and msg.is_read %}
+                                    <i class="bi bi-check-all text-primary" title="Read"></i>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted text-center py-5">
+                        <i class="bi bi-chat" style="font-size: 2rem;"></i><br>
+                        No messages yet. Start the conversation!
+                    </p>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Message Input -->
+        <div class="card shadow-sm">
+            <div class="card-body">
+                {% if user.user_type == 'intern' %}
+                    <div class="alert alert-info mb-3">
+                        <i class="bi bi-info-circle"></i>
+                        You can reply to messages from employers, but cannot start new conversations.
+                    </div>
+                {% endif %}
+                
+                <form method="post" id="messageForm">
+                    {% csrf_token %}
+                    {{ form.message.errors }}
+                    <div class="input-group">
+                        {{ form.message }}
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-send"></i> Send
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <div class="mt-3">
+            <a href="{% url 'core:messages' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Back to Messages
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.message-bubble {
+    max-width: 70%;
+    padding: 0.75rem 1rem;
+    border-radius: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.message-sent {
+    background-color: #0d6efd;
+    color: white;
+    border-bottom-right-radius: 0.25rem;
+}
+
+.message-received {
+    background-color: #f8f9fa;
+    color: #212529;
+    border-bottom-left-radius: 0.25rem;
+}
+
+.message-time {
+    font-size: 0.75rem;
+    opacity: 0.8;
+}
+
+#messagesContainer {
+    background-color: #fafafa;
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Scroll to bottom of messages on load
+$(document).ready(function() {
+    const container = document.getElementById('messagesContainer');
+    container.scrollTop = container.scrollHeight;
+});
+
+// Auto-scroll on form submit
+$('#messageForm').on('submit', function() {
+    setTimeout(function() {
+        const container = document.getElementById('messagesContainer');
+        container.scrollTop = container.scrollHeight;
+    }, 100);
+});
+</script>
+{% endblock %}
+

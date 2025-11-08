@@ -1,0 +1,145 @@
+{% extends 'base.html' %}
+
+{% block title %}My Internships - Lwazi Blue{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-6">
+        <h2>My Internships</h2>
+        <p class="text-muted">Total: {{ total_count }} internship{{ total_count|pluralize }}</p>
+    </div>
+    <div class="col-md-6 text-end">
+        <a href="{% url 'core:internship_create' %}" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Post New Internship
+        </a>
+    </div>
+</div>
+
+<!-- Active Internships -->
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-success text-white">
+        <h5 class="mb-0"><i class="bi bi-check-circle"></i> Active Internships ({{ active_internships.count }})</h5>
+    </div>
+    <div class="card-body">
+        {% if active_internships %}
+            <div class="list-group">
+                {% for internship in active_internships %}
+                <div class="list-group-item">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div class="flex-grow-1">
+                            <h6 class="mb-1">{{ internship.title }}</h6>
+                            <p class="mb-1 small text-muted">
+                                <i class="bi bi-geo-alt"></i> {{ internship.municipality }}, {{ internship.province }}
+                            </p>
+                            <p class="mb-1 small">
+                                <span class="badge bg-primary">{{ internship.industry.name }}</span>
+                                <span class="badge bg-info text-dark">{{ internship.duration_months }} months</span>
+                                {% if internship.stipend %}
+                                <span class="badge bg-success">R{{ internship.stipend|floatformat:0 }}</span>
+                                {% endif %}
+                            </p>
+                            <p class="mb-0 small text-muted">
+                                <i class="bi bi-eye"></i> {{ internship.views_count }} views |
+                                <i class="bi bi-file-earmark-text"></i> {{ internship.applications.count }} application{{ internship.applications.count|pluralize }} |
+                                <i class="bi bi-clock"></i> Deadline: {{ internship.application_deadline|date:"M d, Y" }} ({{ internship.days_until_deadline }} days)
+                            </p>
+                        </div>
+                        <div class="btn-group" role="group">
+                            <a href="{% url 'applications:internship_applications' internship.pk %}" 
+                               class="btn btn-sm btn-outline-success" title="View Applications">
+                                <i class="bi bi-file-earmark-text"></i> {{ internship.applications.count }}
+                            </a>
+                            <a href="{% url 'core:internship_detail' internship.pk %}" class="btn btn-sm btn-outline-primary" title="View">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            <a href="{% url 'core:internship_edit' internship.pk %}" class="btn btn-sm btn-outline-warning" title="Edit">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <form method="post" action="{% url 'core:internship_delete' internship.pk %}" style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-outline-danger" 
+                                        onclick="return confirm('Are you sure you want to close this internship?');" title="Close">
+                                    <i class="bi bi-x-circle"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-muted text-center py-3">No active internships</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Draft Internships -->
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-warning text-dark">
+        <h5 class="mb-0"><i class="bi bi-file-earmark"></i> Drafts ({{ draft_internships.count }})</h5>
+    </div>
+    <div class="card-body">
+        {% if draft_internships %}
+            <div class="list-group">
+                {% for internship in draft_internships %}
+                <div class="list-group-item">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div class="flex-grow-1">
+                            <h6 class="mb-1">{{ internship.title }} <span class="badge bg-warning text-dark">Unpublished</span></h6>
+                            <p class="mb-1 small text-muted">
+                                <i class="bi bi-geo-alt"></i> {{ internship.municipality }}, {{ internship.province }}
+                            </p>
+                        </div>
+                        <div class="btn-group" role="group">
+                            <a href="{% url 'core:internship_edit' internship.pk %}" class="btn btn-sm btn-outline-warning" title="Edit">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <form method="post" action="{% url 'core:internship_delete' internship.pk %}" style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-outline-danger" 
+                                        onclick="return confirm('Delete this draft?');" title="Delete">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-muted text-center py-3">No draft internships</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Closed Internships -->
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-secondary text-white">
+        <h5 class="mb-0"><i class="bi bi-archive"></i> Closed ({{ closed_internships.count }})</h5>
+    </div>
+    <div class="card-body">
+        {% if closed_internships %}
+            <div class="list-group">
+                {% for internship in closed_internships %}
+                <div class="list-group-item">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div class="flex-grow-1">
+                            <h6 class="mb-1">{{ internship.title }} <span class="badge bg-secondary">Closed</span></h6>
+                            <p class="mb-0 small text-muted">
+                                <i class="bi bi-eye"></i> {{ internship.views_count }} views total
+                            </p>
+                        </div>
+                        <a href="{% url 'core:internship_detail' internship.pk %}" class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-eye"></i> View
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-muted text-center py-3">No closed internships</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+

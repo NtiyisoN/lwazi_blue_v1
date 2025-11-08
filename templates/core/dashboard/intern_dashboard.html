@@ -1,0 +1,241 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dashboard - Lwazi Blue{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12 mb-4">
+        <h2>Welcome, {{ user.username }}!</h2>
+        <p class="text-muted">Intern Dashboard</p>
+    </div>
+</div>
+
+{% if needs_profile_setup %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="alert alert-warning">
+            <h5><i class="bi bi-exclamation-triangle"></i> Complete Your Profile</h5>
+            <p>Your profile is only {{ completion_percentage }}% complete. Complete your profile to improve your chances of getting matched with internships!</p>
+            <a href="{% url 'core:profile' %}" class="btn btn-warning">
+                <i class="bi bi-person-plus"></i> Complete Profile Now
+            </a>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<div class="row mb-4">
+    <!-- Profile Completion Card -->
+    <div class="col-md-6 col-lg-3 mb-3">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <h6 class="text-muted">Profile Completion</h6>
+                <div class="progress mb-2" style="height: 25px;">
+                    <div class="progress-bar {% if completion_percentage >= 70 %}bg-success{% elif completion_percentage >= 40 %}bg-warning{% else %}bg-danger{% endif %}" 
+                         role="progressbar" 
+                         style="width: {{ completion_percentage }}%;" 
+                         aria-valuenow="{{ completion_percentage }}" 
+                         aria-valuemin="0" 
+                         aria-valuemax="100">
+                        {{ completion_percentage }}%
+                    </div>
+                </div>
+                <a href="{% url 'core:profile' %}" class="btn btn-sm btn-outline-primary">
+                    <i class="bi bi-person-circle"></i> View Profile
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Applications Card -->
+    <div class="col-md-6 col-lg-3 mb-3">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <h6 class="text-muted">My Applications</h6>
+                <h2 class="mb-3">{{ profile.applications.count }}</h2>
+                <a href="{% url 'applications:list' %}" class="btn btn-sm btn-outline-success">
+                    <i class="bi bi-file-earmark-text"></i> View Applications
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Messages Card -->
+    <div class="col-md-6 col-lg-3 mb-3">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <h6 class="text-muted">Messages</h6>
+                <h2 class="mb-3">
+                    {{ unread_messages }}
+                    {% if unread_messages > 0 %}
+                        <i class="bi bi-dot text-danger" style="font-size: 1rem;"></i>
+                    {% endif %}
+                </h2>
+                <a href="{% url 'core:messages' %}" class="btn btn-sm btn-outline-info">
+                    <i class="bi bi-chat-dots"></i> View Messages
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Matched Opportunities Card -->
+    <div class="col-md-6 col-lg-3 mb-3">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <h6 class="text-muted">Matched Opportunities</h6>
+                <h2 class="mb-3">{{ matched_internships|length }}</h2>
+                <a href="{% url 'core:explore' %}" class="btn btn-sm btn-outline-warning">
+                    <i class="bi bi-compass"></i> Explore
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="bi bi-lightning"></i> Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3 mb-2">
+                        <a href="{% url 'core:profile' %}" class="btn btn-outline-primary w-100">
+                            <i class="bi bi-person"></i><br>Edit Profile
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <a href="{% url 'core:document_upload' %}" class="btn btn-outline-success w-100">
+                            <i class="bi bi-upload"></i><br>Upload Documents
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <a href="{% url 'core:education_add' %}" class="btn btn-outline-info w-100">
+                            <i class="bi bi-mortarboard"></i><br>Add Education
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <a href="{% url 'core:experience_add' %}" class="btn btn-outline-warning w-100">
+                            <i class="bi bi-briefcase"></i><br>Add Experience
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Applications -->
+<div class="row">
+    <div class="col-lg-8 mb-4">
+        <div class="card shadow-sm">
+            <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-file-earmark-text"></i> Recent Applications</h5>
+                <a href="{% url 'applications:list' %}" class="btn btn-light btn-sm">View All</a>
+            </div>
+            <div class="card-body">
+                {% if recent_applications %}
+                    <div class="list-group list-group-flush">
+                        {% for application in recent_applications %}
+                        <a href="{% url 'applications:detail' application.pk %}" 
+                           class="list-group-item list-group-item-action">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1">{{ application.internship.title }}</h6>
+                                    <p class="mb-1 small text-muted">
+                                        {{ application.internship.employer.company_name }}
+                                    </p>
+                                    <p class="mb-0 small text-muted">
+                                        Applied {{ application.applied_at|date:"M d, Y" }}
+                                    </p>
+                                </div>
+                                <span class="badge {{ application.status_badge_class }}">
+                                    {{ application.get_status_display }}
+                                </span>
+                            </div>
+                        </a>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted text-center py-3">
+                        <i class="bi bi-inbox" style="font-size: 2rem;"></i><br>
+                        No applications yet. Browse and apply to internships!
+                    </p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4 mb-4">
+        <div class="card shadow-sm">
+            <div class="card-header bg-success text-white">
+                <h6 class="mb-0"><i class="bi bi-info-circle"></i> Tips</h6>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled">
+                    <li class="mb-2">
+                        <i class="bi bi-check-circle text-success"></i>
+                        Complete your profile to 100%
+                    </li>
+                    <li class="mb-2">
+                        <i class="bi bi-check-circle text-success"></i>
+                        Upload your CV and certificates
+                    </li>
+                    <li class="mb-2">
+                        <i class="bi bi-check-circle text-success"></i>
+                        Add your education and experience
+                    </li>
+                    <li class="mb-2">
+                        <i class="bi bi-check-circle text-success"></i>
+                        Select your skills and industries
+                    </li>
+                    <li>
+                        <i class="bi bi-check-circle text-success"></i>
+                        Browse and apply for internships
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Matched Opportunities Preview -->
+{% if matched_internships %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card shadow-sm">
+            <div class="card-header bg-warning text-dark d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-star"></i> Recommended for You</h5>
+                <a href="{% url 'core:explore' %}" class="btn btn-dark btn-sm">View All</a>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% for internship, score in matched_internships %}
+                    <div class="col-md-6 col-lg-4 mb-3">
+                        <div class="card h-100 border-warning">
+                            <div class="card-header bg-warning text-dark py-2">
+                                <small><i class="bi bi-star-fill"></i> {{ score }}% Match</small>
+                            </div>
+                            <div class="card-body">
+                                <h6 class="card-title">{{ internship.title|truncatewords:5 }}</h6>
+                                <p class="small text-muted mb-2">{{ internship.employer.company_name }}</p>
+                                <p class="small mb-2">
+                                    <i class="bi bi-geo-alt"></i> {{ internship.municipality }}, {{ internship.province }}
+                                </p>
+                                <a href="{% url 'core:internship_detail' internship.pk %}" class="btn btn-sm btn-outline-warning w-100">
+                                    View Details
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,42 @@
+{% load static %}
+<footer class="bg-dark text-light mt-5 py-4">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                <h5 class="text-primary">Lwazi Blue</h5>
+                <p class="small">
+                    Bridging the gap between unemployed graduates and potential employers in South Africa.
+                </p>
+            </div>
+            <div class="col-md-4 mb-3">
+                <h5>Quick Links</h5>
+                <ul class="list-unstyled">
+                    <li><a href="{% url 'core:home' %}" class="text-light text-decoration-none">Home</a></li>
+                    <li><a href="{% url 'core:about' %}" class="text-light text-decoration-none">About</a></li>
+                    <li><a href="{% url 'core:contact' %}" class="text-light text-decoration-none">Contact</a></li>
+                    <li><a href="{% url 'blog:list' %}" class="text-light text-decoration-none">Blog</a></li>
+                </ul>
+            </div>
+            <div class="col-md-4 mb-3">
+                <h5>Contact Us</h5>
+                <p class="small">
+                    <i class="bi bi-envelope"></i> info@lwazi-blue.co.za<br>
+                    <i class="bi bi-geo-alt"></i> South Africa
+                </p>
+            </div>
+        </div>
+        <hr class="border-secondary">
+        <div class="row">
+            <div class="col-md-6 text-center text-md-start">
+                <p class="small mb-0">&copy; {% now "Y" %} Lwazi Blue. All rights reserved.</p>
+            </div>
+            <div class="col-md-6 text-center text-md-end">
+                <p class="small mb-0">
+                    <a href="#" class="text-light text-decoration-none me-3">Privacy Policy</a>
+                    <a href="#" class="text-light text-decoration-none">Terms of Service</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+

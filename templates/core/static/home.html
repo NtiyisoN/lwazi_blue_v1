@@ -1,0 +1,159 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Home - Lwazi Blue{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section py-5 bg-light">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6 mb-4 mb-lg-0">
+                <h1 class="display-4 fw-bold text-primary mb-3">
+                    Connect Knowledge with Opportunities
+                </h1>
+                <p class="lead mb-4">
+                    Lwazi Blue bridges the gap between talented South African youths
+                    and employers looking for fresh talent.
+                </p>
+                {% if user.is_authenticated %}
+                    <a href="{% url 'core:explore' %}" class="btn btn-primary btn-lg me-2">
+                        <i class="bi bi-compass"></i> Explore Opportunities
+                    </a>
+                {% else %}
+                    <a href="{% url 'accounts:login' %}" class="btn btn-primary btn-lg me-2">
+                        <i class="bi bi-box-arrow-in-right"></i> Get Started
+                    </a>
+                    <a href="{% url 'accounts:register' %}" class="btn btn-outline-primary btn-lg">
+                        <i class="bi bi-person-plus"></i> Register Now
+                    </a>
+                {% endif %}
+            </div>
+            <div class="col-lg-6">
+                <img src="{% static 'images/logo.jpg' %}" alt="Lwazi Blue" class="img-fluid rounded shadow">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="features-section py-5">
+    <div class="container">
+        <h2 class="text-center mb-5">Why Choose Lwazi Blue?</h2>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card h-100 text-center border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="feature-icon mb-3">
+                            <i class="bi bi-search text-primary" style="font-size: 3rem;"></i>
+                        </div>
+                        <h4 class="card-title">Smart Matching</h4>
+                        <p class="card-text">
+                            Our intelligent algorithm matches graduates with relevant opportunities 
+                            based on skills, location, and industry.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 text-center border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="feature-icon mb-3">
+                            <i class="bi bi-briefcase text-primary" style="font-size: 3rem;"></i>
+                        </div>
+                        <h4 class="card-title">Easy Application</h4>
+                        <p class="card-text">
+                            Apply for internships with just a few clicks. Track your applications 
+                            and receive real-time updates.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 text-center border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="feature-icon mb-3">
+                            <i class="bi bi-chat-dots text-primary" style="font-size: 3rem;"></i>
+                        </div>
+                        <h4 class="card-title">Direct Communication</h4>
+                        <p class="card-text">
+                            Connect directly with employers through our built-in messaging system. 
+                            Get answers to your questions quickly.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Statistics Section -->
+<section class="stats-section py-5 bg-primary text-white">
+    <div class="container">
+        <div class="row text-center">
+            <div class="col-md-4 mb-3 mb-md-0">
+                <div class="stat-number display-4 fw-bold">1000+</div>
+                <div class="stat-label">Registered Interns</div>
+            </div>
+            <div class="col-md-4 mb-3 mb-md-0">
+                <div class="stat-number display-4 fw-bold">200+</div>
+                <div class="stat-label">Partner Companies</div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-number display-4 fw-bold">500+</div>
+                <div class="stat-label">Internships Posted</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Recent Blog Posts -->
+{% if recent_blogs %}
+<section class="blog-section py-5">
+    <div class="container">
+        <h2 class="text-center mb-5">Latest from Our Blog</h2>
+        <div class="row">
+            {% for post in recent_blogs %}
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 shadow-sm">
+                    {% if post.featured_image %}
+                    <img src="{{ post.featured_image.url }}" class="card-img-top" alt="{{ post.title }}" style="height: 200px; object-fit: cover;">
+                    {% endif %}
+                    <div class="card-body">
+                        <h5 class="card-title">{{ post.title }}</h5>
+                        <p class="card-text small">{{ post.excerpt|truncatewords:20 }}</p>
+                    </div>
+                    <div class="card-footer bg-white">
+                        <a href="{% url 'blog:detail' post.slug %}" class="btn btn-outline-primary btn-sm w-100">
+                            Read More <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="text-center mt-4">
+            <a href="{% url 'blog:list' %}" class="btn btn-primary">
+                <i class="bi bi-journal-text"></i> View All Posts
+            </a>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Call to Action -->
+<section class="cta-section py-5">
+    <div class="container text-center">
+        <h2 class="mb-4">Ready to Get Started?</h2>
+        <p class="lead mb-4">
+            Join thousands of graduates and employers already using Lwazi Blue to find their perfect match.
+        </p>
+        {% if not user.is_authenticated %}
+            <a href="{% url 'accounts:register' %}" class="btn btn-primary btn-lg">
+                <i class="bi bi-person-plus"></i> Create Your Account
+            </a>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
+

@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}{{ action }} Work Experience - Lwazi Blue{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card shadow-sm">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0"><i class="bi bi-briefcase"></i> {{ action }} Work Experience</h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form|crispy }}
+                    
+                    <div class="form-text mb-3">
+                        <i class="bi bi-info-circle"></i>
+                        Check "Currently working here" if this is your current position.
+                    </div>
+                    
+                    <div class="d-grid gap-2 mt-3">
+                        <button type="submit" class="btn btn-warning">
+                            <i class="bi bi-save"></i> Save Experience
+                        </button>
+                        <a href="{% url 'core:profile' %}#experience" class="btn btn-secondary">
+                            <i class="bi bi-x-circle"></i> Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

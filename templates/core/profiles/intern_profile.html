@@ -1,0 +1,374 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block title %}My Profile - Lwazi Blue{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-3 mb-4">
+        <!-- Profile Sidebar -->
+        <div class="card shadow-sm mb-3">
+            <div class="card-body text-center">
+                {% if profile.profile_photo %}
+                    <img src="{{ profile.profile_photo.url }}" alt="Profile Photo" class="profile-photo mb-3">
+                {% else %}
+                    <div class="profile-photo bg-secondary d-flex align-items-center justify-content-center mb-3">
+                        <i class="bi bi-person-circle text-white" style="font-size: 4rem;"></i>
+                    </div>
+                {% endif %}
+                
+                <h5>{{ user.username }}</h5>
+                <p class="text-muted small">{{ user.email }}</p>
+                
+                <div class="progress mb-2" style="height: 25px;">
+                    <div class="progress-bar" role="progressbar" 
+                         style="width: {{ completion_percentage }}%;" 
+                         aria-valuenow="{{ completion_percentage }}" 
+                         aria-valuemin="0" aria-valuemax="100">
+                        {{ completion_percentage }}%
+                    </div>
+                </div>
+                <small class="text-muted">Profile Completion</small>
+            </div>
+        </div>
+        
+        <!-- Quick Links -->
+        <div class="list-group">
+            <a href="#basic-info" class="list-group-item list-group-item-action active" data-bs-toggle="tab" data-bs-target="#basic-info">
+                <i class="bi bi-person"></i> Basic Information
+            </a>
+            <a href="#documents" class="list-group-item list-group-item-action" data-bs-toggle="tab" data-bs-target="#documents">
+                <i class="bi bi-file-earmark"></i> Documents
+            </a>
+            <a href="#education" class="list-group-item list-group-item-action" data-bs-toggle="tab" data-bs-target="#education">
+                <i class="bi bi-mortarboard"></i> Education
+            </a>
+            <a href="#experience" class="list-group-item list-group-item-action" data-bs-toggle="tab" data-bs-target="#experience">
+                <i class="bi bi-briefcase"></i> Work Experience
+            </a>
+        </div>
+    </div>
+    
+    <div class="col-lg-9">
+        <!-- Tabs Navigation -->
+        <ul class="nav nav-tabs mb-4" id="profileTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="basic-tab" data-bs-toggle="tab" data-bs-target="#basic-info" 
+                        type="button" role="tab" aria-controls="basic-info" aria-selected="true">
+                    <i class="bi bi-person"></i> Basic Information
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="documents-tab" data-bs-toggle="tab" data-bs-target="#documents" 
+                        type="button" role="tab" aria-controls="documents" aria-selected="false">
+                    <i class="bi bi-file-earmark"></i> Documents
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="education-tab" data-bs-toggle="tab" data-bs-target="#education" 
+                        type="button" role="tab" aria-controls="education" aria-selected="false">
+                    <i class="bi bi-mortarboard"></i> Education
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="experience-tab" data-bs-toggle="tab" data-bs-target="#experience" 
+                        type="button" role="tab" aria-controls="experience" aria-selected="false">
+                    <i class="bi bi-briefcase"></i> Work Experience
+                </button>
+            </li>
+        </ul>
+
+        <!-- Tab Content -->
+        <div class="tab-content" id="profileTabsContent">
+            <!-- Basic Information Tab -->
+            <div class="tab-pane fade show active" id="basic-info" role="tabpanel" aria-labelledby="basic-tab">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="bi bi-person"></i> Basic Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="post" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            {{ form|crispy }}
+                            <div class="text-end">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-save"></i> Save Profile
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        
+            <!-- Documents Tab -->
+            <div class="tab-pane fade" id="documents" role="tabpanel" aria-labelledby="documents-tab">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="bi bi-file-earmark"></i> Documents</h5>
+                        <a href="{% url 'core:document_upload' %}" class="btn btn-light btn-sm">
+                            <i class="bi bi-plus-circle"></i> Upload Document
+                        </a>
+                    </div>
+                    <div class="card-body">
+                        {% if documents %}
+                            <div class="list-group">
+                                {% for doc in documents %}
+                                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="mb-1">{{ doc.get_document_type_display }}</h6>
+                                            <small class="text-muted">
+                                                Uploaded: {{ doc.uploaded_at|date:"M d, Y" }} | Version: {{ doc.version }}
+                                            </small>
+                                            {% if doc.description %}
+                                                <p class="mb-0 small">{{ doc.description }}</p>
+                                            {% endif %}
+                                        </div>
+                                        <div>
+                                            <a href="{{ doc.document.url }}" class="btn btn-sm btn-outline-primary" target="_blank">
+                                                <i class="bi bi-eye"></i> View
+                                            </a>
+                                            <form method="post" action="{% url 'core:document_delete' doc.id %}" style="display:inline;">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-sm btn-outline-danger" 
+                                                        onclick="return confirm('Remove this document?');">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <p class="text-muted text-center py-3">
+                                <i class="bi bi-inbox" style="font-size: 2rem;"></i><br>
+                                No documents uploaded yet
+                            </p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        
+            <!-- Education Tab -->
+            <div class="tab-pane fade" id="education" role="tabpanel" aria-labelledby="education-tab">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="bi bi-mortarboard"></i> Education</h5>
+                        <a href="{% url 'core:education_add' %}" class="btn btn-light btn-sm">
+                            <i class="bi bi-plus-circle"></i> Add Education
+                        </a>
+                    </div>
+                    <div class="card-body">
+                        {% if education %}
+                            <div class="list-group">
+                                {% for edu in education %}
+                                    <div class="list-group-item">
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <div class="flex-grow-1">
+                                                <h6 class="mb-1">{{ edu.qualification }} in {{ edu.field_of_study }}</h6>
+                                                <p class="mb-1"><strong>{{ edu.institution }}</strong></p>
+                                                <p class="mb-1 text-muted small">
+                                                    {{ edu.start_date|date:"M Y" }} - 
+                                                    {% if edu.is_current %}
+                                                        <span class="badge bg-success">Current</span>
+                                                    {% else %}
+                                                        {{ edu.end_date|date:"M Y" }}
+                                                    {% endif %}
+                                                </p>
+                                                {% if edu.grade %}
+                                                    <p class="mb-1 small"><strong>Grade:</strong> {{ edu.grade }}</p>
+                                                {% endif %}
+                                                {% if edu.description %}
+                                                    <p class="mb-0 small">{{ edu.description|truncatewords:30 }}</p>
+                                                {% endif %}
+                                            </div>
+                                            <div class="btn-group" role="group">
+                                                <a href="{% url 'core:education_edit' edu.id %}" class="btn btn-sm btn-outline-primary">
+                                                    <i class="bi bi-pencil"></i>
+                                                </a>
+                                                <form method="post" action="{% url 'core:education_delete' edu.id %}" style="display:inline;">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger" 
+                                                            onclick="return confirm('Delete this education record?');">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <p class="text-muted text-center py-3">
+                                <i class="bi bi-mortarboard" style="font-size: 2rem;"></i><br>
+                                No education records added yet
+                            </p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        
+            <!-- Work Experience Tab -->
+            <div class="tab-pane fade" id="experience" role="tabpanel" aria-labelledby="experience-tab">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-warning text-dark d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="bi bi-briefcase"></i> Work Experience</h5>
+                        <a href="{% url 'core:experience_add' %}" class="btn btn-dark btn-sm">
+                            <i class="bi bi-plus-circle"></i> Add Experience
+                        </a>
+                    </div>
+                    <div class="card-body">
+                        {% if work_experience %}
+                            <div class="list-group">
+                                {% for exp in work_experience %}
+                                    <div class="list-group-item">
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <div class="flex-grow-1">
+                                                <h6 class="mb-1">{{ exp.position }}</h6>
+                                                <p class="mb-1"><strong>{{ exp.company }}</strong></p>
+                                                <p class="mb-1 text-muted small">
+                                                    {{ exp.start_date|date:"M Y" }} - 
+                                                    {% if exp.is_current %}
+                                                        <span class="badge bg-success">Current</span>
+                                                    {% else %}
+                                                        {{ exp.end_date|date:"M Y" }}
+                                                    {% endif %}
+                                                </p>
+                                                <p class="mb-1 small">{{ exp.description|truncatewords:30 }}</p>
+                                                {% if exp.skills_used.exists %}
+                                                    <div class="mt-2">
+                                                        {% for skill in exp.skills_used.all %}
+                                                            <span class="badge bg-secondary">{{ skill.name }}</span>
+                                                        {% endfor %}
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                            <div class="btn-group" role="group">
+                                                <a href="{% url 'core:experience_edit' exp.id %}" class="btn btn-sm btn-outline-primary">
+                                                    <i class="bi bi-pencil"></i>
+                                                </a>
+                                                <form method="post" action="{% url 'core:experience_delete' exp.id %}" style="display:inline;">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger" 
+                                                            onclick="return confirm('Delete this work experience?');">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <p class="text-muted text-center py-3">
+                                <i class="bi bi-briefcase" style="font-size: 2rem;"></i><br>
+                                No work experience added yet
+                            </p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div> <!-- End tab-content -->
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.profile-photo {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Sync sidebar and tab navigation
+document.addEventListener('DOMContentLoaded', function() {
+    // When a tab is clicked, update sidebar active state
+    const tabButtons = document.querySelectorAll('[data-bs-toggle="tab"]');
+    tabButtons.forEach(btn => {
+        btn.addEventListener('shown.bs.tab', function(event) {
+            // Remove active from all sidebar items
+            document.querySelectorAll('.list-group-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            // Find corresponding sidebar item and make it active
+            const target = event.target.getAttribute('data-bs-target');
+            const sidebarLink = document.querySelector(`.list-group-item[data-bs-target="${target}"]`);
+            if (sidebarLink) {
+                sidebarLink.classList.add('active');
+            }
+        });
+    });
+    
+    // Convert multi-select fields to toggle badges
+    convertMultiSelectToToggles('id_preferred_locations', 'Preferred Locations');
+    convertMultiSelectToToggles('id_skills', 'Skills');
+    convertMultiSelectToToggles('id_industries', 'Industries');
+});
+
+function convertMultiSelectToToggles(selectId, label) {
+    const selectElement = document.getElementById(selectId);
+    if (!selectElement) return;
+    
+    // Get the parent form group
+    const formGroup = selectElement.closest('.mb-3, .form-group');
+    if (!formGroup) return;
+    
+    // Create a container for badges
+    const badgeContainer = document.createElement('div');
+    badgeContainer.className = 'badge-toggle-container mb-2';
+    badgeContainer.style.cssText = 'display: flex; flex-wrap: wrap; gap: 8px; padding: 10px; background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px; min-height: 50px;';
+    
+    // Get all options
+    const options = Array.from(selectElement.options);
+    const selectedValues = Array.from(selectElement.selectedOptions).map(opt => opt.value);
+    
+    // Create badges for each option
+    options.forEach(option => {
+        if (!option.value) return; // Skip empty values
+        
+        const badge = document.createElement('span');
+        badge.className = selectedValues.includes(option.value) ? 'badge bg-primary' : 'badge bg-secondary';
+        badge.textContent = option.text;
+        badge.style.cursor = 'pointer';
+        badge.style.fontSize = '0.9rem';
+        badge.style.padding = '0.5rem 0.8rem';
+        badge.style.userSelect = 'none';
+        badge.dataset.value = option.value;
+        
+        // Toggle on click
+        badge.addEventListener('click', function() {
+            const isSelected = this.classList.contains('bg-primary');
+            if (isSelected) {
+                this.classList.remove('bg-primary');
+                this.classList.add('bg-secondary');
+                option.selected = false;
+            } else {
+                this.classList.remove('bg-secondary');
+                this.classList.add('bg-primary');
+                option.selected = true;
+            }
+        });
+        
+        badgeContainer.appendChild(badge);
+    });
+    
+    // Hide the original select element
+    selectElement.style.display = 'none';
+    
+    // Hide the help text
+    const helpText = formGroup.querySelector('.form-text');
+    if (helpText) {
+        helpText.style.display = 'none';
+    }
+    
+    // Insert badge container after the label but before the select
+    selectElement.parentNode.insertBefore(badgeContainer, selectElement);
+}
+</script>
+{% endblock %}
