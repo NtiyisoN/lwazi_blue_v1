@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+{% load app_filters %}
+
+{% block title %}My Applications - Lwazi Blue{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-6">
+        <h2>My Applications</h2>
+        <p class="text-muted">Total: {{ total_count }} application{{ total_count|pluralize }}</p>
+    </div>
+    <div class="col-md-6 text-end">
+        <a href="{% url 'core:internship_list' %}" class="btn btn-primary">
+            <i class="bi bi-search"></i> Browse Internships
+        </a>
+    </div>
+</div>
+
+<!-- Status Filter Tabs -->
+<ul class="nav nav-tabs mb-4">
+    <li class="nav-item">
+        <a class="nav-link {% if not status_filter %}active{% endif %}" 
+           href="{% url 'applications:list' %}">
+            All ({{ total_count }})
+        </a>
+    </li>
+    {% for status_code, status_name in status_choices %}
+    <li class="nav-item">
+        <a class="nav-link {% if status_filter == status_code %}active{% endif %}" 
+           href="?status={{ status_code }}">
+            {{ status_name }} ({{ status_counts|get_item:status_code|default:0 }})
+        </a>
+    </li>
+    {% endfor %}
+</ul>
+
+<!-- Applications List -->
+{% if applications %}
+    <div class="row">
+        {% for application in applications %}
+        <div class="col-12 mb-3">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h5 class="mb-1">
+                                <a href="{% url 'applications:detail' application.pk %}" class="text-decoration-none">
+                                    {{ application.internship.title }}
+                                </a>
+                            </h5>
+                            <p class="text-muted mb-2">{{ application.internship.employer.company_name }}</p>
+                            <p class="small text-muted mb-2">
+                                <i class="bi bi-geo-alt"></i> {{ application.internship.municipality }}, {{ application.internship.province }} |
+                                <i class="bi bi-calendar"></i> Applied {{ application.applied_at|date:"M d, Y" }}
+                            </p>
+                            <div>
+                                <span class="badge {{ application.status_badge_class }}">
+                                    {{ application.get_status_display }}
+                                </span>
+                                {% if application.internship.industry %}
+                                <span class="badge bg-primary">{{ application.internship.industry.name }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <a href="{% url 'applications:detail' application.pk %}" class="btn btn-outline-primary btn-sm">
+                                <i class="bi bi-eye"></i> View Details
+                            </a>
+                            <a href="{% url 'core:internship_detail' application.internship.pk %}" class="btn btn-outline-secondary btn-sm mt-2">
+                                <i class="bi bi-briefcase"></i> View Internship
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <!-- Pagination -->
+    {% if applications.has_other_pages %}
+    <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center">
+            {% if applications.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ applications.previous_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}">
+                    Previous
+                </a>
+            </li>
+            {% endif %}
+            
+            {% for num in applications.paginator.page_range %}
+            <li class="page-item {% if applications.number == num %}active{% endif %}">
+                <a class="page-link" href="?page={{ num }}{% if status_filter %}&status={{ status_filter }}{% endif %}">
+                    {{ num }}
+                </a>
+            </li>
+            {% endfor %}
+            
+            {% if applications.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ applications.next_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}">
+                    Next
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+{% else %}
+    <div class="alert alert-info text-center py-5">
+        <i class="bi bi-inbox" style="font-size: 3rem;"></i>
+        <h4 class="mt-3">No Applications Yet</h4>
+        <p>
+            {% if status_filter %}
+                No applications with this status.
+            {% else %}
+                You haven't applied to any internships yet. Browse opportunities to get started!
+            {% endif %}
+        </p>
+        <a href="{% url 'core:internship_list' %}" class="btn btn-primary">
+            <i class="bi bi-search"></i> Browse Internships
+        </a>
+    </div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Helper to get dictionary items in template
+$.fn.get_item = function(key) {
+    return this[key];
+};
+</script>
+{% endblock %}
+

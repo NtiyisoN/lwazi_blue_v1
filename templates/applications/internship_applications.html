@@ -1,0 +1,182 @@
+{% extends 'base.html' %}
+
+{% block title %}Applications - {{ internship.title }} - Lwazi Blue{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h2>Applications for: {{ internship.title }}</h2>
+        <p class="text-muted">Total: {{ total_count }} application{{ total_count|pluralize }}</p>
+    </div>
+</div>
+
+<!-- Internship Summary Card -->
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h5>{{ internship.title }}</h5>
+                <p class="mb-1 text-muted">{{ internship.municipality }}, {{ internship.province }}</p>
+                <p class="small mb-0">
+                    <span class="badge bg-primary">{{ internship.industry.name }}</span>
+                    <span class="badge bg-info text-dark">{{ internship.duration_months }} months</span>
+                    <span class="badge {% if internship.is_accepting_applications %}bg-success{% else %}bg-secondary{% endif %}">
+                        {% if internship.is_accepting_applications %}Open{% else %}Closed{% endif %}
+                    </span>
+                </p>
+            </div>
+            <div class="col-md-4 text-end">
+                <a href="{% url 'core:internship_detail' internship.pk %}" class="btn btn-outline-primary">
+                    <i class="bi bi-eye"></i> View Internship
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Status Filter Tabs -->
+<ul class="nav nav-pills mb-4">
+    <li class="nav-item">
+        <a class="nav-link {% if not status_filter %}active{% endif %}" 
+           href="{% url 'applications:internship_applications' internship.pk %}">
+            All ({{ total_count }})
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link {% if status_filter == 'pending' %}active{% endif %}" 
+           href="?status=pending">
+            Pending ({{ status_counts.pending|default:0 }})
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link {% if status_filter == 'interview_pending' %}active{% endif %}" 
+           href="?status=interview_pending">
+            Interview ({{ status_counts.interview_pending|default:0 }})
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link {% if status_filter == 'success' %}active{% endif %}" 
+           href="?status=success">
+            Accepted ({{ status_counts.success|default:0 }})
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link {% if status_filter == 'declined' %}active{% endif %}" 
+           href="?status=declined">
+            Declined ({{ status_counts.declined|default:0 }})
+        </a>
+    </li>
+</ul>
+
+<!-- Applications Table -->
+{% if applications %}
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead class="table-light">
+                <tr>
+                    <th>Applicant</th>
+                    <th>Applied On</th>
+                    <th>Status</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for application in applications %}
+                <tr>
+                    <td>
+                        <div class="d-flex align-items-center">
+                            {% if application.intern.profile_photo %}
+                                <img src="{{ application.intern.profile_photo.url }}" alt="Photo" 
+                                     style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;" class="me-2">
+                            {% else %}
+                                <div class="bg-secondary text-white me-2" 
+                                     style="width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                    <i class="bi bi-person"></i>
+                                </div>
+                            {% endif %}
+                            <div>
+                                <strong>{{ application.intern.full_name|default:application.intern.user.username }}</strong><br>
+                                <small class="text-muted">@{{ application.intern.user.username }}</small>
+                            </div>
+                        </div>
+                    </td>
+                    <td>{{ application.applied_at|date:"M d, Y" }}</td>
+                    <td>
+                        <span class="badge {{ application.status_badge_class }}">
+                            {{ application.get_status_display }}
+                        </span>
+                    </td>
+                    <td class="text-end">
+                        <div class="btn-group" role="group">
+                            <a href="{% url 'applications:detail' application.pk %}" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-eye"></i> View
+                            </a>
+                            <a href="{% url 'core:intern_profile_public' application.intern.user.username %}" 
+                               class="btn btn-sm btn-outline-info">
+                                <i class="bi bi-person"></i> Profile
+                            </a>
+                            <a href="{% url 'applications:update_status' application.pk %}" 
+                               class="btn btn-sm btn-outline-warning">
+                                <i class="bi bi-pencil"></i> Update
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- Pagination -->
+    {% if applications.has_other_pages %}
+    <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center">
+            {% if applications.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ applications.previous_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}">
+                    Previous
+                </a>
+            </li>
+            {% endif %}
+            
+            {% for num in applications.paginator.page_range %}
+            <li class="page-item {% if applications.number == num %}active{% endif %}">
+                <a class="page-link" href="?page={{ num }}{% if status_filter %}&status={{ status_filter }}{% endif %}">
+                    {{ num }}
+                </a>
+            </li>
+            {% endfor %}
+            
+            {% if applications.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ applications.next_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}">
+                    Next
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+{% else %}
+    <div class="alert alert-info text-center py-5">
+        <i class="bi bi-inbox" style="font-size: 3rem;"></i>
+        <h4 class="mt-3">No Applications Found</h4>
+        <p>
+            {% if status_filter %}
+                No applications with this status. Try viewing all applications.
+            {% else %}
+                You haven't received any applications for this internship yet.
+            {% endif %}
+        </p>
+    </div>
+{% endif %}
+
+<div class="row mt-4">
+    <div class="col-12">
+        <a href="{% url 'core:employer_internships' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Back to My Internships
+        </a>
+    </div>
+</div>
+{% endblock %}
+

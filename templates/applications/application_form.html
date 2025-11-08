@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Apply - {{ internship.title }} - Lwazi Blue{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <!-- Internship Summary -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="bi bi-briefcase"></i> Applying For</h5>
+            </div>
+            <div class="card-body">
+                <h4>{{ internship.title }}</h4>
+                <p class="mb-2"><strong>{{ internship.employer.company_name }}</strong></p>
+                <p class="text-muted small mb-0">
+                    <i class="bi bi-geo-alt"></i> {{ internship.municipality }}, {{ internship.province }} |
+                    <i class="bi bi-clock"></i> {{ internship.days_until_deadline }} days left to apply
+                </p>
+            </div>
+        </div>
+        
+        <!-- Application Form -->
+        <div class="card shadow-sm">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="bi bi-file-earmark-text"></i> Your Application</h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i>
+                    <strong>Tips for a great application:</strong>
+                    <ul class="mb-0 mt-2">
+                        <li>Explain why you're interested in this specific internship</li>
+                        <li>Highlight relevant skills and experience</li>
+                        <li>Show enthusiasm and willingness to learn</li>
+                        <li>Proofread for errors</li>
+                    </ul>
+                </div>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form|crispy }}
+                    
+                    <div class="text-end mt-4">
+                        <a href="{% url 'core:internship_detail' internship.pk %}" class="btn btn-secondary">
+                            <i class="bi bi-x-circle"></i> Cancel
+                        </a>
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-send"></i> Submit Application
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Character counter for cover letter
+$(document).ready(function() {
+    const coverLetter = $('textarea[name="cover_letter"]');
+    const counterDiv = $('<div class="text-muted small mt-1" id="char-counter"></div>');
+    coverLetter.after(counterDiv);
+    
+    function updateCounter() {
+        const length = coverLetter.val().length;
+        const minLength = 100;
+        const color = length >= minLength ? 'text-success' : 'text-warning';
+        counterDiv.removeClass('text-success text-warning').addClass(color);
+        counterDiv.html(`${length} characters (minimum ${minLength})`);
+    }
+    
+    coverLetter.on('input', updateCounter);
+    updateCounter();
+});
+</script>
+{% endblock %}
+

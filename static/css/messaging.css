@@ -1,0 +1,121 @@
+/* Messaging/Chat interface styles */
+
+.chat-container {
+    height: 500px;
+    overflow-y: auto;
+    padding: 1.5rem;
+    background-color: #fafafa;
+    border-radius: 8px;
+}
+
+.message-bubble {
+    max-width: 70%;
+    padding: 0.75rem 1rem;
+    border-radius: 1rem;
+    margin-bottom: 0.5rem;
+    word-wrap: break-word;
+}
+
+.message-sent {
+    background-color: #0d6efd;
+    color: white;
+    margin-left: auto;
+    border-bottom-right-radius: 0.25rem;
+}
+
+.message-received {
+    background-color: #e9ecef;
+    color: #212529;
+    border-bottom-left-radius: 0.25rem;
+}
+
+.message-time {
+    font-size: 0.75rem;
+    opacity: 0.7;
+    margin-top: 0.25rem;
+}
+
+.message-input-container {
+    background-color: white;
+    border-top: 1px solid #dee2e6;
+    padding: 1rem;
+}
+
+.message-input {
+    resize: none;
+    border: 1px solid #dee2e6;
+    border-radius: 20px;
+    padding: 0.75rem 1rem;
+}
+
+.message-input:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+.send-button {
+    border-radius: 50%;
+    width: 45px;
+    height: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Conversation list */
+.conversation-item {
+    padding: 1rem;
+    border-bottom: 1px solid #dee2e6;
+    transition: background-color 0.2s ease;
+    cursor: pointer;
+}
+
+.conversation-item:hover {
+    background-color: #f8f9fa;
+}
+
+.conversation-item.unread {
+    background-color: #e7f1ff;
+    border-left: 3px solid #0d6efd;
+}
+
+.conversation-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 1rem;
+}
+
+.unread-badge {
+    background-color: #dc3545;
+    color: white;
+    border-radius: 12px;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    font-weight: bold;
+}
+
+/* Typing indicator */
+.typing-indicator {
+    display: none;
+    padding: 0.5rem 1rem;
+    color: #6c757d;
+    font-style: italic;
+}
+
+.typing-indicator.active {
+    display: block;
+}
+
+/* Responsive messaging */
+@media (max-width: 768px) {
+    .chat-container {
+        height: 400px;
+    }
+    
+    .message-bubble {
+        max-width: 85%;
+    }
+}
+

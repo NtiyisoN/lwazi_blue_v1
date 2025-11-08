@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Update Application Status - Lwazi Blue{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <!-- Application Summary -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0"><i class="bi bi-file-earmark-text"></i> Application</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p class="mb-1"><strong>Applicant:</strong></p>
+                        <p>{{ application.intern.full_name|default:application.intern.user.username }}</p>
+                        
+                        <p class="mb-1"><strong>Internship:</strong></p>
+                        <p>{{ application.internship.title }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p class="mb-1"><strong>Current Status:</strong></p>
+                        <p>
+                            <span class="badge {{ application.status_badge_class }} fs-6">
+                                {{ application.get_status_display }}
+                            </span>
+                        </p>
+                        
+                        <p class="mb-1"><strong>Applied On:</strong></p>
+                        <p>{{ application.applied_at|date:"F d, Y" }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Update Status Form -->
+        <div class="card shadow-sm">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0"><i class="bi bi-pencil"></i> Update Status</h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    <strong>Note:</strong> The applicant will receive an email notification when you update the status.
+                </div>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form|crispy }}
+                    
+                    <div class="text-end mt-4">
+                        <a href="{% url 'applications:detail' application.pk %}" class="btn btn-secondary">
+                            <i class="bi bi-x-circle"></i> Cancel
+                        </a>
+                        <button type="submit" class="btn btn-warning">
+                            <i class="bi bi-send"></i> Update & Notify
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Status Guide -->
+        <div class="card shadow-sm mt-4">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="bi bi-info-circle"></i> Status Guide</h6>
+            </div>
+            <div class="card-body">
+                <ul class="small mb-0">
+                    <li><strong>Pending Review:</strong> Initial status, review in progress</li>
+                    <li><strong>Interview Scheduled:</strong> Invite for interview</li>
+                    <li><strong>Interview Passed:</strong> Successful interview</li>
+                    <li><strong>Interview Failed:</strong> Unsuccessful interview</li>
+                    <li><strong>Pending Final Decision:</strong> Awaiting final approval</li>
+                    <li><strong>Accepted:</strong> Application successful, offer extended</li>
+                    <li><strong>Declined:</strong> Application unsuccessful</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

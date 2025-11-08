@@ -1,0 +1,177 @@
+{% extends 'base.html' %}
+
+{% block title %}Application Details - Lwazi Blue{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 mb-4">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="bi bi-file-earmark-text"></i> Application Details</h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <p class="mb-1"><strong>Status:</strong></p>
+                        <span class="badge {{ application.status_badge_class }} fs-6">
+                            {{ application.get_status_display }}
+                        </span>
+                    </div>
+                    <div class="col-md-6">
+                        <p class="mb-1"><strong>Applied On:</strong></p>
+                        <p>{{ application.applied_at|date:"F d, Y - g:i A" }}</p>
+                    </div>
+                </div>
+                
+                <hr>
+                
+                <h5 class="mb-3">Cover Letter</h5>
+                <p style="white-space: pre-line;">{{ application.cover_letter }}</p>
+                
+                {% if application.additional_documents.exists %}
+                <hr>
+                <h5 class="mb-3">Additional Documents</h5>
+                <div class="list-group">
+                    {% for doc in application.additional_documents.all %}
+                    <a href="{{ doc.document.url }}" target="_blank" class="list-group-item list-group-item-action">
+                        <i class="bi bi-file-earmark-pdf"></i> {{ doc.get_document_type_display }}
+                        <span class="badge bg-secondary">v{{ doc.version }}</span>
+                    </a>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                
+                {% if is_employer and application.employer_notes %}
+                <hr>
+                <h5 class="mb-3"><i class="bi bi-sticky"></i> Internal Notes</h5>
+                <div class="card bg-light border-secondary">
+                    <div class="card-body">
+                        <p class="mb-0" style="white-space: pre-line;">{{ application.employer_notes }}</p>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        {% if is_employer %}
+        <!-- Update Status (Employer View) -->
+        <div class="card shadow-sm">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0"><i class="bi bi-pencil"></i> Update Application Status</h5>
+            </div>
+            <div class="card-body">
+                <a href="{% url 'applications:update_status' application.pk %}" class="btn btn-warning">
+                    <i class="bi bi-pencil"></i> Update Status
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    
+    <div class="col-lg-4">
+        <!-- Internship Info -->
+        <div class="card shadow-sm mb-3">
+            <div class="card-header bg-info text-white">
+                <h6 class="mb-0"><i class="bi bi-briefcase"></i> Internship</h6>
+            </div>
+            <div class="card-body">
+                <h5>{{ application.internship.title }}</h5>
+                <p class="mb-2"><strong>{{ application.internship.employer.company_name }}</strong></p>
+                <p class="text-muted small mb-2">
+                    <i class="bi bi-geo-alt"></i> {{ application.internship.municipality }}, {{ application.internship.province }}
+                </p>
+                <a href="{% url 'core:internship_detail' application.internship.pk %}" class="btn btn-sm btn-outline-primary w-100">
+                    <i class="bi bi-eye"></i> View Internship
+                </a>
+            </div>
+        </div>
+        
+        <!-- Applicant Info (Employer View) -->
+        {% if is_employer %}
+        <div class="card shadow-sm mb-3">
+            <div class="card-header bg-success text-white">
+                <h6 class="mb-0"><i class="bi bi-person"></i> Applicant</h6>
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-3">
+                    {% if application.intern.profile_photo %}
+                        <img src="{{ application.intern.profile_photo.url }}" alt="Profile" class="profile-photo-md">
+                    {% else %}
+                        <div class="profile-photo-md bg-secondary d-flex align-items-center justify-content-center mx-auto">
+                            <i class="bi bi-person text-white" style="font-size: 2rem;"></i>
+                        </div>
+                    {% endif %}
+                </div>
+                <h6 class="text-center">{{ application.intern.full_name|default:application.intern.user.username }}</h6>
+                <p class="text-center text-muted small">@{{ application.intern.user.username }}</p>
+                <a href="{% url 'core:intern_profile_public' application.intern.user.username %}" 
+                   class="btn btn-sm btn-outline-success w-100">
+                    <i class="bi bi-eye"></i> View Full Profile
+                </a>
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Timeline -->
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="bi bi-clock-history"></i> Timeline</h6>
+            </div>
+            <div class="card-body">
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <i class="bi bi-check-circle text-success"></i>
+                        <strong>Applied</strong><br>
+                        <small class="text-muted">{{ application.applied_at|date:"M d, Y - g:i A" }}</small>
+                    </div>
+                    {% if application.status != 'pending' %}
+                    <div class="timeline-item mt-3">
+                        <i class="bi bi-arrow-repeat text-primary"></i>
+                        <strong>Status Updated</strong><br>
+                        <small class="text-muted">{{ application.status_updated_at|date:"M d, Y - g:i A" }}</small><br>
+                        <span class="badge {{ application.status_badge_class }} mt-1">
+                            {{ application.get_status_display }}
+                        </span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-3">
+    <div class="col-12">
+        {% if is_employer %}
+        <a href="{% url 'applications:internship_applications' application.internship.pk %}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Back to Applications
+        </a>
+        {% else %}
+        <a href="{% url 'applications:list' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Back to My Applications
+        </a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.profile-photo-md {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+.timeline-item {
+    position: relative;
+    padding-left: 30px;
+}
+.timeline-item i {
+    position: absolute;
+    left: 0;
+    top: 2px;
+}
+</style>
+{% endblock %}
+

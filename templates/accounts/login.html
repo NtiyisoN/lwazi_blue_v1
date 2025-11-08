@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Login - Lwazi Blue{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+        <div class="card shadow-sm">
+            <div class="card-body p-5">
+                <h2 class="card-title text-center mb-4">Welcome Back</h2>
+                <p class="text-center text-muted mb-4">
+                    Login to your Lwazi Blue account
+                </p>
+                
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    {{ form|crispy }}
+                    
+                    <div class="d-grid gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="bi bi-box-arrow-in-right"></i> Login
+                        </button>
+                    </div>
+                </form>
+                
+                <div class="text-center mt-3">
+                    <a href="{% url 'accounts:otp_login' %}" class="text-decoration-none">
+                        <i class="bi bi-shield-lock"></i> Login with OTP (No Password)
+                    </a>
+                </div>
+                
+                <hr class="my-4">
+                
+                <p class="text-center mb-0">
+                    Don't have an account?
+                    <a href="{% url 'accounts:register' %}" class="text-decoration-none">
+                        Register here
+                    </a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

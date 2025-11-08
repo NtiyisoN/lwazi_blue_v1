@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}OTP Login - Lwazi Blue{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+        <div class="card shadow-sm">
+            <div class="card-body p-5">
+                <h2 class="card-title text-center mb-4">
+                    <i class="bi bi-shield-lock text-primary"></i>
+                    Login with OTP
+                </h2>
+                
+                {% if step == 1 %}
+                    <!-- Step 1: Request OTP -->
+                    <p class="text-center text-muted mb-4">
+                        Enter your email to receive a one-time password
+                    </p>
+                    
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i>
+                        We'll send a 6-digit code to your email. No password required!
+                    </div>
+                    
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        {{ form|crispy }}
+                        
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-send"></i> Send OTP
+                            </button>
+                        </div>
+                    </form>
+                    
+                {% else %}
+                    <!-- Step 2: Verify OTP -->
+                    <p class="text-center text-muted mb-4">
+                        Enter the code we sent to <strong>{{ email }}</strong>
+                    </p>
+                    
+                    <div class="alert alert-success">
+                        <i class="bi bi-check-circle"></i>
+                        OTP sent! Check your email for the 6-digit code.
+                    </div>
+                    
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        {{ form|crispy }}
+                        
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-box-arrow-in-right"></i> Login
+                            </button>
+                        </div>
+                    </form>
+                    
+                    <div class="text-center mt-3">
+                        <button type="button" class="btn btn-link text-decoration-none" id="resendOtpBtn">
+                            <i class="bi bi-arrow-repeat"></i> Resend Code
+                        </button>
+                        <span class="mx-2">|</span>
+                        <a href="{% url 'accounts:otp_login' %}" class="btn btn-link text-decoration-none" onclick="return confirm('Start over with a different email?');">
+                            <i class="bi bi-arrow-left"></i> Change Email
+                        </a>
+                    </div>
+                {% endif %}
+                
+                <hr class="my-4">
+                
+                <p class="text-center mb-0">
+                    <a href="{% url 'accounts:login' %}" class="text-decoration-none">
+                        <i class="bi bi-arrow-left"></i> Back to Standard Login
+                    </a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if step == 2 %}
+<script>
+document.getElementById('resendOtpBtn').addEventListener('click', function() {
+    const btn = this;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span> Sending...';
+    
+    fetch('{% url "accounts:request_otp" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: 'email={{ email }}&otp_type=login'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+        } else {
+            alert('Error: ' + data.message);
+        }
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-arrow-repeat"></i> Resend Code';
+    })
+    .catch(error => {
+        alert('An error occurred. Please try again.');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-arrow-repeat"></i> Resend Code';
+    });
+});
+</script>
+{% endif %}
+{% endblock %}
+
